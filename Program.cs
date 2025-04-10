@@ -16,13 +16,22 @@ namespace Hand_in_W15
             var Actorcommand = new SqlCommand(actorQuery, connection);
 
             connection.Open();
-            
-            var Actorreader = Actorcommand.ExecuteReader();
 
+            List<int> actorIds = new();
+            actorIds = GetAndPrintActorIds(Actorcommand);
+
+            connection.Close();
+        }
+
+        private static List<int> GetAndPrintActorIds(SqlCommand Actorcommand)
+        {
+            var Actorreader = Actorcommand.ExecuteReader();
+            List<int> actorIds = new();
             if (Actorreader.HasRows)
             {
                 while (Actorreader.Read())
                 {
+                    actorIds.Add((int)Actorreader[0]);
                     Console.WriteLine($"Id: {Actorreader[0]} Namn: {Actorreader[1]} {Actorreader[2]}");
                 }
             }
@@ -30,8 +39,7 @@ namespace Hand_in_W15
             {
                 Console.WriteLine("Det finns ingen skådespelare med det namnet.");
             }
-
-            connection.Close();
+            return actorIds;
         }
 
         private static string GetStringInput(string name)
