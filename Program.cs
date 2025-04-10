@@ -8,31 +8,41 @@ namespace Hand_in_W15
         static void Main(string[] args)
         {
             var connection = new SqlConnection("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Sakila;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False");
-            string firstName = GetStringInput("förnamn");
-            string lastName = GetStringInput("efternamn");
-            string actorQuery = "select actor_id, first_name,last_name " +
-                                "from actor " +
-                                "where first_name like 'susan' and last_name like 'davis'";
-            var Actorcommand = new SqlCommand(actorQuery, connection);
-
+        
             connection.Open();
 
-            List<int> actorIds = new();
-            actorIds = GetAndPrintActorIds(Actorcommand);
+            List<int> actorIds = GetAndPrintActorIds(connection, GetStringInput("förnamn"), GetStringInput("efternamn"));
+            if (actorIds.Count == 1)
+            {
+                GetAndPrintFilms(connection, actorIds[0]);
+            }
 
             connection.Close();
         }
 
-        private static List<int> GetAndPrintActorIds(SqlCommand Actorcommand)
+        private static void GetAndPrintFilms(SqlConnection connection, int actorId)
         {
-            var Actorreader = Actorcommand.ExecuteReader();
+            string filmQuery = "select title " +
+                                "from film " +
+                                "inner join film_actor on film.film_id = film_actor.film_id " +
+                                $"where film_actor.actor_id = {actorId}";
+        }
+
+        private static List<int> GetAndPrintActorIds(SqlConnection connection, string firstName, string lastName)
+        {
+            string actorQuery = "select actor_id, first_name,last_name " +
+                                "from actor " +
+                                "where first_name like 'susan' and last_name like 'davis'";
             List<int> actorIds = new();
-            if (Actorreader.HasRows)
+            var actorcommand = new SqlCommand(actorQuery, connection);
+            var actorReader = actorcommand.ExecuteReader();
+            
+            if (actorReader.HasRows)
             {
-                while (Actorreader.Read())
+                while (actorReader.Read())
                 {
-                    actorIds.Add((int)Actorreader[0]);
-                    Console.WriteLine($"Id: {Actorreader[0]} Namn: {Actorreader[1]} {Actorreader[2]}");
+                    actorIds.Add((int)actorReader[0]);
+                    Console.WriteLine($"Id: {actorReader[0]} Namn: {actorReader[1]} {actorReader[2]}");
                 }
             }
             else
