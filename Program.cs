@@ -26,16 +26,31 @@ namespace Hand_in_W15
                                 "from film " +
                                 "inner join film_actor on film.film_id = film_actor.film_id " +
                                 $"where film_actor.actor_id = {actorId}";
+            var filmCommand = new SqlCommand(filmQuery, connection);
+            var filmReader = filmCommand.ExecuteReader();
+
+            if (filmReader.HasRows)
+            {
+                Console.WriteLine("Filmer som skådespelaren medverkat i:");
+                while (filmReader.Read())
+                {
+                    Console.WriteLine(filmReader[0]);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Skådespelaren har inte medverkat i några filmer.");
+            }
         }
 
         private static List<int> GetAndPrintActorIds(SqlConnection connection, string firstName, string lastName)
         {
             string actorQuery = "select actor_id, first_name,last_name " +
                                 "from actor " +
-                                "where first_name like 'susan' and last_name like 'davis'";
+                               $"where first_name like '{firstName}' and last_name like '{lastName}'";
             List<int> actorIds = new();
-            var actorcommand = new SqlCommand(actorQuery, connection);
-            var actorReader = actorcommand.ExecuteReader();
+            var actorCommand = new SqlCommand(actorQuery, connection);
+            var actorReader = actorCommand.ExecuteReader();
             
             if (actorReader.HasRows)
             {
@@ -49,6 +64,7 @@ namespace Hand_in_W15
             {
                 Console.WriteLine("Det finns ingen skådespelare med det namnet.");
             }
+            actorReader.Close();
             return actorIds;
         }
 
