@@ -12,12 +12,25 @@ namespace Hand_in_W15
             connection.Open();
 
             List<int> actorIds = GetAndPrintActorIds(connection, GetStringInput("förnamn"), GetStringInput("efternamn"));
-            if (actorIds.Count == 1)
+            if (actorIds.Count >= 2)
+            {
+                Console.Write("Det finns fler skådespelare med samma namn. Skriv id på den du vill veta mer om:");
+                if (int.TryParse(Console.ReadLine(), out int actorId) && actorIds.Contains(actorId))
+                {
+                    GetAndPrintFilms(connection, actorId);
+                }
+                else
+                {
+                    Console.WriteLine("Inmatningen stämde inte överrens med önskat värde.");
+                }
+            }
+            else
             {
                 GetAndPrintFilms(connection, actorIds[0]);
             }
+            
 
-            connection.Close();
+                connection.Close();
         }
 
         private static void GetAndPrintFilms(SqlConnection connection, int actorId)
