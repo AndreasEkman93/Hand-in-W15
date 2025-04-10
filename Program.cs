@@ -8,29 +8,37 @@ namespace Hand_in_W15
         static void Main(string[] args)
         {
             var connection = new SqlConnection("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Sakila;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False");
-        
-            connection.Open();
 
-            List<int> actorIds = GetAndPrintActorIds(connection, GetStringInput("förnamn"), GetStringInput("efternamn"));
-            if (actorIds.Count >= 2)
+            try
             {
-                Console.Write("Det finns fler skådespelare med samma namn. Skriv id på den du vill veta mer om:");
-                if (int.TryParse(Console.ReadLine(), out int actorId) && actorIds.Contains(actorId))
+                connection.Open();
+
+                List<int> actorIds = GetAndPrintActorIds(connection, GetStringInput("förnamn"), GetStringInput("efternamn"));
+
+                if (actorIds.Count >= 2)
                 {
-                    GetAndPrintFilms(connection, actorId);
+                    Console.Write("Det finns fler skådespelare med samma namn. Skriv id på den du vill veta mer om:");
+                    if (int.TryParse(Console.ReadLine(), out int actorId) && actorIds.Contains(actorId))
+                    {
+                        GetAndPrintFilms(connection, actorId);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Inmatningen stämde inte överrens med önskat värde.");
+                    }
                 }
-                else
+                else if (actorIds.Count == 1)
                 {
-                    Console.WriteLine("Inmatningen stämde inte överrens med önskat värde.");
+                    GetAndPrintFilms(connection, actorIds[0]);
                 }
-            }
-            else
-            {
-                GetAndPrintFilms(connection, actorIds[0]);
-            }
-            
 
                 connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Något gick fel under tiden det fanns en koppling mot databasen.");
+                Console.WriteLine($"Felmeddelande : {ex}");
+            }
         }
 
         private static void GetAndPrintFilms(SqlConnection connection, int actorId)
@@ -64,7 +72,7 @@ namespace Hand_in_W15
             List<int> actorIds = new();
             var actorCommand = new SqlCommand(actorQuery, connection);
             var actorReader = actorCommand.ExecuteReader();
-            
+
             if (actorReader.HasRows)
             {
                 while (actorReader.Read())
