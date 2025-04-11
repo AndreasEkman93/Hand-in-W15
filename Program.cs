@@ -39,6 +39,10 @@ namespace Hand_in_W15
                 Console.WriteLine("Något gick fel under tiden det fanns en koppling mot databasen.");
                 Console.WriteLine($"Felmeddelande : {ex}");
             }
+            finally
+            {
+                connection.Close();
+            }
         }
 
         private static void GetAndPrintFilms(SqlConnection connection, int actorId)
